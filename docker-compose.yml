@@ -1,0 +1,90 @@
+# docker-compose.yml
+version: '2'
+services:
+  dle-webapp1:
+    depends_on:
+      - dle-log-agent
+    container_name: dle-webapp1
+    image: nginx:1.12-alpine
+    volumes:
+      - ./dle-webapp1/:/usr/share/nginx/html:ro
+    ports:
+      - '8000:80'
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+
+  dle-log-agent:
+    depends_on:
+      - dle-log-forwarder-pri
+      - dle-log-forwarder-sec
+    container_name: dle-log-agent
+    image: fluent/fluentd:stable
+    volumes:
+      - ./dle-log-agent/:/fluentd/etc
+    ports:
+      - '24224:24224'
+    environment:
+      - FLUENTD_OPT=-v
+
+  dle-log-forwarder-pri:
+    depends_on:
+      - dle-log-store
+      - dle-log-search
+      - dle-log-archive
+    container_name: dle-log-forwarder-pri
+    image: dle-log-forwarder
+    build: dle-log-forwarder
+    volumes:
+      - ./dle-log-forwarder/:/fluentd/etc
+    environment:
+      - FLUENTD_OPT=-v
+
+  dle-log-forwarder-sec:
+    depends_on:
+      - dle-log-store
+      - dle-log-search
+      - dle-log-archive
+    container_name: dle-log-forwarder-sec
+    image: dle-log-forwarder
+    build: dle-log-forwarder
+    volumes:
+      - ./dle-log-forwarder/:/fluentd/etc
+    environment:
+      - FLUENTD_OPT=-v
+
+  dle-log-store:
+    container_name: dle-log-store
+    image: mongo:3.6
+    volumes:
+      - dle-log-store:/data/db
+
+  dle-log-search:
+    container_name: dle-log-search
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.1.1
+    volumes:
+      - dle-log-search:/usr/share/elasticsearch/data
+    ports:
+      - '9200:9200'
+    environment:
+      - cluster.name=dle-log-search
+      - 'ES_JAVA_OPTS=-Xms128m -Xmx128m'
+
+  dle-log-archive:
+    container_name: dle-log-archive
+    image: scality/s3server
+    volumes:
+      - dle-log-archive-localmetadata:/usr/src/app/localMetadata
+      - dle-log-archive-localdata:/usr/src/app/localData
+    ports:
+      - '9000:8000'
+    environment:
+      - ENDPOINT=dle-log-archive
+
+volumes:
+  dle-log-store:
+  dle-log-search:
+  dle-log-archive-localmetadata:
+  dle-log-archive-localdata:
+
