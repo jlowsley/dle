@@ -22,8 +22,9 @@ git clone https://github.com/jlowsley/dle
 cd dle
 docker-compose up
 ```
+_Note: the store, search, and archive containers take about a minute to initialize and become available_
 ## Testing
-To test the setup make a request to the web application container, using a browser or with curl:
+After the containers are initialized and running, and docker-compose logs come to a stop, the setup can be tested. Make a request to the web application container, using a browser or with curl:
 ```
 $ curl localhost:8000
 <html><p>Simple Static Content!</p></html>
