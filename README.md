@@ -51,13 +51,13 @@ __Elasticsearch (dle-log-search)__
 
 Use the cat count API to see that the index now has some records.
 ```
-$ curl "http://127.0.0.1:9200/_cat/count/logstash-`date +%Y.%m.%d`?v"
+$ curl "http://127.0.0.1:9200/_cat/count/logstash-`date -u +%Y.%m.%d`?v"
 epoch      timestamp count
 1514398977 18:22:57  101
 ```
 To look at one of the entries:
 ```
-$ curl "http://127.0.0.1:9200/logstash-`date +%Y.%m.%d`/_search?size=1&pretty=true"
+$ curl "http://127.0.0.1:9200/logstash-`date -u +%Y.%m.%d`/_search?size=1&pretty=true"
 ...
 ```
 __S3 (dle-log-archive)__
@@ -66,12 +66,12 @@ Listing the `applogs` bucket using the `logs` and date prefix should show an arc
 ```
 $ export AWS_ACCESS_KEY_ID=accessKey1
 $ export AWS_SECRET_ACCESS_KEY=verySecretKey1
-$ aws --endpoint-url http://localhost:9000 s3 ls s3://applogs/logs/`date +%Y-%m-%d`/
+$ aws --endpoint-url http://localhost:9000 s3 ls s3://applogs/logs/`date -u +%Y-%m-%d`/
 2017-12-27 11:21:22        475 18_0.gz
 ```
 To copy it to the host to read it:
 ```
-$ aws --endpoint-url http://localhost:9000 s3 cp s3://applogs/logs/`date +%Y-%m-%d`/18_0.gz .
+$ aws --endpoint-url http://localhost:9000 s3 cp s3://applogs/logs/`date -u +%Y-%m-%d`/18_0.gz .
 download: s3://applogs/logs/2017-12-27/18_0.gz to ./18_0.gz
 $ zcat 18_0.gz
 ...
