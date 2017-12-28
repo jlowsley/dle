@@ -14,6 +14,7 @@ services:
       driver: fluentd
       options:
         fluentd-address: localhost:24224
+        tag: docker.{{.ID}}
 
   dle-log-agent:
     depends_on:
